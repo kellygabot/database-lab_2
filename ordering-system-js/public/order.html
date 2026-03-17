@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Place Order</title>
+</head>
+<body>
+  <h1>Place Order</h1>
+  <form id="orderForm">
+    <input type="text" id="full_name" placeholder="Full Name" required><br><br>
+    <input type="email" id="email" placeholder="Email" required><br><br>
+    <input type="text" id="phone" placeholder="Phone" required><br><br>
+    <input type="text" id="address" placeholder="Address" required><br><br>
+
+    <h3>Order Item</h3>
+    <input type="number" id="product_id" placeholder="Product ID" required><br><br>
+    <input type="number" id="quantity" placeholder="Quantity" required><br><br>
+    <input type="number" id="price" placeholder="Price" required step="0.01"><br><br>
+
+    <button type="submit">Submit Order</button>
+  </form>
+
+  <script>
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const orderData = {
+        full_name: document.getElementById('full_name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        items: [
+          {
+            product_id: parseInt(document.getElementById('product_id').value),
+            quantity: parseInt(document.getElementById('quantity').value),
+            price: parseFloat(document.getElementById('price').value)
+          }
+        ]
+      };
+
+      const response = await fetch('/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      const result = await response.json();
+      alert('Order placed successfully. Order ID: ' + result.order_id);
+    });
+  </script>
+</body>
+</html>
