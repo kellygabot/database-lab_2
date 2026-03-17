@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistics — QuickOrder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #faf9f7;
+      --text: #1a1916;
+      --muted: #9b9690;
+      --accent: #c8602a;
+      --line: #e8e5e0;
+      --surface: #fff;
+      --green: #4a7c5f;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--line);
+      padding: 1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back { font-size: 0.78rem; color: var(--muted); text-decoration: none; letter-spacing: 0.05em; transition: color 0.15s; }
+    .back:hover { color: var(--accent); }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 400; }
+    .header-right { margin-left: auto; font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; }
+
+    /* ── Main ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3.5rem 2.5rem 5rem;
+      animation: rise 0.55s ease both;
+    }
+    @keyframes rise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+
+    .page-head { margin-bottom: 3rem; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 0.35rem; }
+    .page-sub { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── Overview cards ── */
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 3.5rem;
+    }
+    @media(max-width:640px) { .overview { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:380px) { .overview { grid-template-columns: 1fr; } }
+
+    .ov-card {
+      padding: 1.6rem 1.4rem;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .ov-card:last-child { border-right: none; }
+    @media(max-width:640px) {
+      .ov-card:nth-child(2) { border-right: none; }
+      .ov-card:nth-child(3) { border-top: 1px solid var(--line); }
+      .ov-card:nth-child(4) { border-top: 1px solid var(--line); border-right: none; }
+    }
+
+    .ov-label { font-size: 0.67rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; font-weight: 400; }
+    .ov-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.5px; line-height: 1; }
+    .ov-value.accent { color: var(--accent); }
+
+    /* ── Section title ── */
+    .section-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      font-weight: 400;
+    }
+    .section { margin-bottom: 3.5rem; }
+
+    /* ── Best sellers ── */
+    .bs-table { width: 100%; border-collapse: collapse; }
+
+    .bs-table thead th {
+      text-align: left;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 400;
+      padding: 0 0 0.7rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .bs-table thead th.r { text-align: right; }
+
+    .bs-table tbody tr { border-bottom: 1px solid var(--line); }
+    .bs-table tbody tr:last-child { border-bottom: none; }
+    .bs-table tbody td { padding: 1rem 0; vertical-align: middle; font-size: 0.88rem; }
+    .bs-table tbody td.r { text-align: right; }
+
+    .rank {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--muted);
+      width: 2rem;
+    }
+    .rank.top { color: var(--accent); }
+
+    .bs-name { font-weight: 400; }
+    .bs-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    /* Bar */
+    .bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .bar-track {
+      flex: 1;
+      height: 3px;
+      background: var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 0.6s cubic-bezier(0.23,1,0.32,1);
+    }
+    .bar-num { font-size: 0.8rem; font-weight: 400; min-width: 2.5rem; text-align: right; }
+
+    /* ── Pairings ── */
+    .pairs-list { display: flex; flex-direction: column; }
+
+    .pair-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      animation: fadeRow 0.3s ease forwards;
+    }
+    .pair-row:first-child { border-top: 1px solid var(--line); }
+    @keyframes fadeRow { to { opacity:1; } }
+
+    .pair-rank { font-family:'Playfair Display',serif; font-size:0.9rem; color:var(--muted); width:1.5rem; flex-shrink:0; }
+    .pair-names { flex: 1; font-size: 0.88rem; }
+    .pair-plus { color: var(--muted); margin: 0 0.4rem; font-size: 0.75rem; }
+    .pair-pill {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      padding: 0.2rem 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .pair-bar-wrap {
+      width: 120px;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    @media(max-width:500px) { .pair-bar-wrap { display:none; } }
+
+    /* ── Empty / error ── */
+    .empty { font-size: 0.83rem; color: var(--muted); padding: 1.5rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .err   { font-size: 0.83rem; color: #b04040; padding: 1rem 0; }
+
+    /* ── Skeleton ── */
+    .skel { height: 13px; border-radius: 2px; background: linear-gradient(90deg,var(--line) 25%,#f0ede8 50%,var(--line) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
+    @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+    .skel-row { display:flex; gap:1rem; padding:1rem 0; border-bottom:1px solid var(--line); align-items:center; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back">← Back</a>
+  <span class="logo">QuickOrder</span>
+  <span class="header-right" id="updatedAt"></span>
+</header>
+
+<main>
+  <div class="page-head">
+    <h1>Statistics</h1>
+    <p class="page-sub">Sales performance and ordering patterns</p>
+  </div>
+
+  <!-- Overview -->
+  <div class="overview" id="overview">
+    <div class="ov-card"><div class="ov-label">Total Orders</div><div class="ov-value skel" style="width:60%;height:2rem"></div></div>
+    <div class="ov-card"><div class="ov-label">Revenue</div><div class="ov-value skel" style="width:70%;height:2rem"></div></div>
+    <div class="ov-card"><div class="ov-label">Customers</div><div class="ov-value skel" style="width:50%;height:2rem"></div></div>
+    <div class="ov-card"><div class="ov-label">Completed</div><div class="ov-value skel" style="width:55%;height:2rem"></div></div>
+  </div>
+
+  <!-- Best Sellers -->
+  <div class="section">
+    <div class="section-label">Best Sellers</div>
+    <div id="bestsellers"></div>
+  </div>
+
+  <!-- Pairings -->
+  <div class="section">
+    <div class="section-label">Commonly Paired Together</div>
+    <div id="pairings"></div>
+  </div>
+</main>
+
+<script>
+  // ── Skeletons ──
+  function bsSkeleton() {
+    return Array(5).fill(0).map(() => `
+      <div class="skel-row">
+        <div class="skel" style="width:1.5rem;height:1rem;flex-shrink:0"></div>
+        <div style="flex:1"><div class="skel" style="width:55%;margin-bottom:6px"></div><div class="skel" style="width:35%;height:10px"></div></div>
+        <div class="skel" style="width:100px;height:10px"></div>
+        <div class="skel" style="width:50px;height:10px"></div>
+      </div>`).join('');
+  }
+
+  document.getElementById('bestsellers').innerHTML = bsSkeleton();
+  document.getElementById('pairings').innerHTML = bsSkeleton();
+
+  // ── Fetch all ──
+  async function load() {
+    const [ov, bs, pa] = await Promise.all([
+      fetch('/stats/overview').then(r => r.json()).catch(() => null),
+      fetch('/stats/bestsellers').then(r => r.json()).catch(() => []),
+      fetch('/stats/pairings').then(r => r.json()).catch(() => []),
+    ]);
+
+    document.getElementById('updatedAt').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    renderOverview(ov);
+    renderBestsellers(bs);
+    renderPairings(pa);
+  }
+
+  // ── Overview ──
+  function renderOverview(d) {
+    const el = document.getElementById('overview');
+    if (!d) { el.innerHTML = '<div class="err" style="padding:1.2rem">Could not load overview.</div>'; return; }
+    el.innerHTML = `
+      <div class="ov-card"><div class="ov-label">Total Orders</div><div class="ov-value">${d.total_orders}</div></div>
+      <div class="ov-card"><div class="ov-label">Revenue</div><div class="ov-value accent">₱${parseFloat(d.total_revenue).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
+      <div class="ov-card"><div class="ov-label">Customers</div><div class="ov-value">${d.total_customers}</div></div>
+      <div class="ov-card"><div class="ov-label">Completed</div><div class="ov-value">${d.completed_orders}</div></div>
+    `;
+  }
+
+  // ── Best Sellers ──
+  function renderBestsellers(data) {
+    const el = document.getElementById('bestsellers');
+    if (!data || !data.length) {
+      el.innerHTML = '<div class="empty">No sales data yet.</div>'; return;
+    }
+    const max = Math.max(...data.map(d => Number(d.total_sold)));
+
+    el.innerHTML = `
+      <table class="bs-table">
+        <thead>
+          <tr>
+            <th style="width:2rem"></th>
+            <th>Product</th>
+            <th>Units Sold</th>
+            <th class="r">Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map((d, i) => `
+            <tr>
+              <td class="rank ${i < 3 ? 'top' : ''}">${i+1}</td>
+              <td>
+                <div class="bs-name">${d.product_name}</div>
+                <div class="bs-meta">${d.order_count} order${d.order_count !== 1 ? 's' : ''} · ₱${parseFloat(d.price).toFixed(2)} each</div>
+              </td>
+              <td>
+                <div class="bar-wrap">
+                  <div class="bar-track"><div class="bar-fill" style="width:${(d.total_sold/max*100).toFixed(1)}%"></div></div>
+                  <span class="bar-num">${d.total_sold}</span>
+                </div>
+              </td>
+              <td class="r" style="font-weight:400">₱${parseFloat(d.total_revenue).toLocaleString('en-PH',{minimumFractionDigits:2})}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+
+    // Animate bars after paint
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.bar-fill').forEach(b => b.style.transform = 'scaleX(1)');
+      });
+    });
+  }
+
+  // ── Pairings ──
+  function renderPairings(data) {
+    const el = document.getElementById('pairings');
+    if (!data || !data.length) {
+      el.innerHTML = '<div class="empty">Not enough order data to find pairings yet. Pairings appear once multiple items are ordered together.</div>';
+      return;
+    }
+    const max = Math.max(...data.map(d => Number(d.pair_count)));
+
+    el.innerHTML = `<div class="pairs-list">${
+      data.map((d, i) => `
+        <div class="pair-row" style="animation-delay:${i*0.04}s">
+          <div class="pair-rank">${i+1}</div>
+          <div class="pair-names">
+            <strong style="font-weight:400">${d.product_a}</strong>
+            <span class="pair-plus">+</span>
+            <strong style="font-weight:400">${d.product_b}</strong>
+          </div>
+          <div class="pair-pill">${d.pair_count}× together</div>
+          <div class="pair-bar-wrap">
+            <div class="bar-track" style="flex:1"><div class="bar-fill" style="background:var(--green);width:${(d.pair_count/max*100).toFixed(1)}%"></div></div>
+          </div>
+        </div>
+      `).join('')
+    }</div>`;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.bar-fill').forEach(b => b.style.transform = 'scaleX(1)');
+      });
+    });
+  }
+
+  load();
+</script>
+</body>
+</html>

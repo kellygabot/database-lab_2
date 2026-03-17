@@ -1,23 +1,321 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Products</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu — QuickOrder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #faf9f7;
+      --text: #1a1916;
+      --muted: #9b9690;
+      --accent: #c8602a;
+      --line: #e8e5e0;
+      --surface: #fff;
+      --green: #4a7c5f;
+      --orange: #c8602a;
+      --red: #b04040;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--line);
+      padding: 1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+    .back:hover { color: var(--accent); }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      letter-spacing: -0.3px;
+    }
+    .header-right {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* Layout */
+    main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 3.5rem 2.5rem;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      letter-spacing: -0.5px;
+    }
+    .item-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* Search */
+    .search-wrap {
+      margin: 1.8rem 0 2.5rem;
+      position: relative;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      padding: 0.65rem 0;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 300;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap input::placeholder { color: var(--muted); }
+
+    /* Table-style product list */
+    .product-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-row {
+      display: grid;
+      grid-template-columns: 2fr 3fr 1fr 1fr;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.15rem 0;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      animation: fadeRow 0.35s ease forwards;
+    }
+    .product-row:first-child { border-top: 1px solid var(--line); }
+    @keyframes fadeRow { to { opacity: 1; } }
+
+    .col-head {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--line);
+      font-weight: 400;
+    }
+    .col-head-row {
+      display: grid;
+      grid-template-columns: 2fr 3fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .p-name {
+      font-weight: 400;
+      font-size: 0.92rem;
+    }
+    .p-id {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .p-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .p-price {
+      font-size: 0.92rem;
+      font-weight: 400;
+    }
+
+    .stock-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      font-weight: 400;
+    }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .s-in .dot  { background: var(--green); }
+    .s-low .dot { background: var(--orange); }
+    .s-out .dot { background: var(--red); }
+    .s-in  { color: var(--green); }
+    .s-low { color: var(--orange); }
+    .s-out { color: var(--red); }
+
+    /* Skeleton */
+    .skel-row {
+      display: grid;
+      grid-template-columns: 2fr 3fr 1fr 1fr;
+      gap: 1rem;
+      padding: 1.15rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .skel {
+      height: 13px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--line) 25%, #f0ede8 50%, var(--line) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+
+    .empty {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .error-msg {
+      font-size: 0.85rem;
+      color: var(--red);
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+  </style>
 </head>
 <body>
-  <h1>Available Products</h1>
-  <ul id="productList"></ul>
+  <header>
+    <a href="index.html" class="back">← Back</a>
+    <span class="logo">QuickOrder</span>
+    <span class="header-right" id="updatedAt"></span>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <h1>Menu</h1>
+      <span class="item-count" id="countLabel"></span>
+    </div>
+
+    <div class="search-wrap">
+      <input type="text" id="search" placeholder="Search products…" oninput="filter()">
+    </div>
+
+    <div id="output"></div>
+  </main>
 
   <script>
-    fetch('/products')
-      .then(response => response.json())
-      .then(data => {
-        const productList = document.getElementById('productList');
-        data.forEach(product => {
-          const li = document.createElement('li');
-          li.textContent = `${product.product_name} - P${product.price} - Stock: ${product.stock}`;
-          productList.appendChild(li);
-        });
-      });
+    let all = [];
+
+    function stockClass(s) {
+      if (s <= 0) return 's-out';
+      if (s <= 10) return 's-low';
+      return 's-in';
+    }
+    function stockLabel(s) {
+      if (s <= 0) return 'Out of stock';
+      if (s <= 10) return `${s} left`;
+      return `${s} in stock`;
+    }
+
+    function render(items) {
+      const out = document.getElementById('output');
+      document.getElementById('countLabel').textContent = items.length + ' item' + (items.length !== 1 ? 's' : '');
+
+      if (!items.length) {
+        out.innerHTML = '<div class="empty">No products found.</div>';
+        return;
+      }
+
+      out.innerHTML = `
+        <div class="col-head-row">
+          <div class="col-head">Product</div>
+          <div class="col-head">Description</div>
+          <div class="col-head">Price</div>
+          <div class="col-head">Stock</div>
+        </div>
+        <div class="product-list">
+          ${items.map((p, i) => `
+            <div class="product-row" style="animation-delay:${i*0.04}s">
+              <div>
+                <div class="p-name">${p.product_name}</div>
+                <div class="p-id">#${p.product_id}</div>
+              </div>
+              <div class="p-desc">${p.description || '—'}</div>
+              <div class="p-price">₱${parseFloat(p.price).toFixed(2)}</div>
+              <div class="stock-pill ${stockClass(p.stock)}">
+                <span class="dot"></span>${stockLabel(p.stock)}
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+
+    function filter() {
+      const q = document.getElementById('search').value.toLowerCase();
+      render(all.filter(p => p.product_name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q)));
+    }
+
+    function showSkeletons() {
+      document.getElementById('output').innerHTML = `
+        <div class="col-head-row">
+          <div class="col-head">Product</div>
+          <div class="col-head">Description</div>
+          <div class="col-head">Price</div>
+          <div class="col-head">Stock</div>
+        </div>
+        ${Array(5).fill(`
+          <div class="skel-row">
+            <div class="skel" style="width:55%"></div>
+            <div class="skel" style="width:80%"></div>
+            <div class="skel" style="width:50%"></div>
+            <div class="skel" style="width:60%"></div>
+          </div>`).join('')}`;
+    }
+
+    async function load() {
+      showSkeletons();
+      try {
+        const res = await fetch('/products');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        all = await res.json();
+        document.getElementById('updatedAt').textContent = 'Updated ' + new Date().toLocaleTimeString();
+        render(all);
+      } catch (e) {
+        document.getElementById('output').innerHTML = `<div class="error-msg">⚠ Could not load products — ${e.message}</div>`;
+      }
+    }
+
+    load();
   </script>
 </body>
 </html>
