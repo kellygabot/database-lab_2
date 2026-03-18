@@ -59,7 +59,7 @@
     /* ── Overview cards ── */
     .overview {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 0;
       border: 1px solid var(--line);
       border-radius: 3px;
@@ -215,7 +215,6 @@
     <div class="ov-card"><div class="ov-label">Total Orders</div><div class="ov-value skel" style="width:60%;height:2rem"></div></div>
     <div class="ov-card"><div class="ov-label">Revenue</div><div class="ov-value skel" style="width:70%;height:2rem"></div></div>
     <div class="ov-card"><div class="ov-label">Customers</div><div class="ov-value skel" style="width:50%;height:2rem"></div></div>
-    <div class="ov-card"><div class="ov-label">Completed</div><div class="ov-value skel" style="width:55%;height:2rem"></div></div>
   </div>
 
   <!-- Best Sellers -->
@@ -268,7 +267,6 @@
       <div class="ov-card"><div class="ov-label">Total Orders</div><div class="ov-value">${d.total_orders}</div></div>
       <div class="ov-card"><div class="ov-label">Revenue</div><div class="ov-value accent">₱${parseFloat(d.total_revenue).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>
       <div class="ov-card"><div class="ov-label">Customers</div><div class="ov-value">${d.total_customers}</div></div>
-      <div class="ov-card"><div class="ov-label">Completed</div><div class="ov-value">${d.completed_orders}</div></div>
     `;
   }
 

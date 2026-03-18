@@ -107,7 +107,7 @@ app.get('/stats/overview', (req, res) => {
       (SELECT COUNT(*) FROM orders)                                    AS total_orders,
       (SELECT COALESCE(SUM(total_amount), 0) FROM orders)             AS total_revenue,
       (SELECT COUNT(*) FROM customers)                                 AS total_customers,
-      (SELECT COUNT(*) FROM orders WHERE order_status = 'Completed')  AS completed_orders
+
   `;
   db.query(sql, (err, result) => {
     if (err) return res.status(500).json({ message: err.message });
