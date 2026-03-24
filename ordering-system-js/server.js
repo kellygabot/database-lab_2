@@ -24,7 +24,6 @@ app.post("/order", (req, res) => {
     return res.status(400).json({ message: "Missing required fields." });
   }
 
-  // Check if customer already exists by email
   db.query(
     "SELECT customer_id FROM customers WHERE email = ?",
     [email],
@@ -32,7 +31,6 @@ app.post("/order", (req, res) => {
       if (err) return res.status(500).json({ message: err.message });
 
       if (existing.length > 0) {
-        // Customer exists — use their ID, optionally update their info
         const customerId = existing[0].customer_id;
         db.query(
           "UPDATE customers SET full_name = ?, phone = ?, address = ? WHERE customer_id = ?",
@@ -43,7 +41,6 @@ app.post("/order", (req, res) => {
           },
         );
       } else {
-        // New customer — insert
         db.query(
           "INSERT INTO customers (full_name, email, phone, address) VALUES (?, ?, ?, ?)",
           [full_name, email, phone, address],
@@ -70,15 +67,16 @@ function placeOrder(customerId, items, res) {
       if (err) return res.status(500).json({ message: err.message });
 
       const orderId = orderResult.insertId;
-      let completed = 0;
       let hasError = false;
 
       items.forEach((item) => {
         const subtotal = item.quantity * item.price;
 
+        // Lab 3: includes unit_price to match updated order_items schema
         db.query(
-          `INSERT INTO order_items (order_id, product_id, quantity, subtotal) VALUES (?, ?, ?, ?)`,
-          [orderId, item.product_id, item.quantity, subtotal],
+          `INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal)
+           VALUES (?, ?, ?, ?, ?)`,
+          [orderId, item.product_id, item.quantity, item.price, subtotal],
           (err) => {
             if (err && !hasError) {
               hasError = true;
@@ -97,8 +95,6 @@ function placeOrder(customerId, items, res) {
             }
           },
         );
-
-        completed++;
       });
 
       if (!hasError) {
@@ -130,9 +126,7 @@ app.get("/stats/overview", (req, res) => {
 app.get("/stats/bestsellers", (req, res) => {
   const sql = `
     SELECT
-      p.product_id,
-      p.product_name,
-      p.price,
+      p.product_id, p.product_name, p.price,
       SUM(oi.quantity)            AS total_sold,
       SUM(oi.subtotal)            AS total_revenue,
       COUNT(DISTINCT oi.order_id) AS order_count
@@ -152,9 +146,9 @@ app.get("/stats/bestsellers", (req, res) => {
 app.get("/stats/pairings", (req, res) => {
   const sql = `
     SELECT
-      p1.product_name  AS product_a,
-      p2.product_name  AS product_b,
-      COUNT(*)         AS pair_count
+      p1.product_name AS product_a,
+      p2.product_name AS product_b,
+      COUNT(*)        AS pair_count
     FROM order_items a
     JOIN order_items b  ON a.order_id = b.order_id AND a.product_id < b.product_id
     JOIN products p1    ON p1.product_id = a.product_id
