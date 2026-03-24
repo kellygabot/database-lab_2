@@ -1,61 +1,67 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const db = require('./db');
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const db = require("./db");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // --- Products ---
-app.get('/products', (req, res) => {
-  db.query('SELECT * FROM products WHERE stock > 0', (err, result) => {
+app.get("/products", (req, res) => {
+  db.query("SELECT * FROM products WHERE stock > 0", (err, result) => {
     if (err) return res.status(500).json({ message: err.message });
     res.json(result);
   });
 });
 
 // --- Place Order ---
-app.post('/order', (req, res) => {
+app.post("/order", (req, res) => {
   const { full_name, email, phone, address, items } = req.body;
 
   if (!full_name || !email || !phone || !address || !items || !items.length) {
-    return res.status(400).json({ message: 'Missing required fields.' });
+    return res.status(400).json({ message: "Missing required fields." });
   }
 
   // Check if customer already exists by email
-  db.query('SELECT customer_id FROM customers WHERE email = ?', [email], (err, existing) => {
-    if (err) return res.status(500).json({ message: err.message });
+  db.query(
+    "SELECT customer_id FROM customers WHERE email = ?",
+    [email],
+    (err, existing) => {
+      if (err) return res.status(500).json({ message: err.message });
 
-    if (existing.length > 0) {
-      // Customer exists — use their ID, optionally update their info
-      const customerId = existing[0].customer_id;
-      db.query(
-        'UPDATE customers SET full_name = ?, phone = ?, address = ? WHERE customer_id = ?',
-        [full_name, phone, address, customerId],
-        (err) => {
-          if (err) return res.status(500).json({ message: err.message });
-          placeOrder(customerId, items, res);
-        }
-      );
-    } else {
-      // New customer — insert
-      db.query(
-        'INSERT INTO customers (full_name, email, phone, address) VALUES (?, ?, ?, ?)',
-        [full_name, email, phone, address],
-        (err, result) => {
-          if (err) return res.status(500).json({ message: err.message });
-          placeOrder(result.insertId, items, res);
-        }
-      );
-    }
-  });
+      if (existing.length > 0) {
+        // Customer exists — use their ID, optionally update their info
+        const customerId = existing[0].customer_id;
+        db.query(
+          "UPDATE customers SET full_name = ?, phone = ?, address = ? WHERE customer_id = ?",
+          [full_name, phone, address, customerId],
+          (err) => {
+            if (err) return res.status(500).json({ message: err.message });
+            placeOrder(customerId, items, res);
+          },
+        );
+      } else {
+        // New customer — insert
+        db.query(
+          "INSERT INTO customers (full_name, email, phone, address) VALUES (?, ?, ?, ?)",
+          [full_name, email, phone, address],
+          (err, result) => {
+            if (err) return res.status(500).json({ message: err.message });
+            placeOrder(result.insertId, items, res);
+          },
+        );
+      }
+    },
+  );
 });
 
 function placeOrder(customerId, items, res) {
   let totalAmount = 0;
-  items.forEach(item => { totalAmount += item.quantity * item.price; });
+  items.forEach((item) => {
+    totalAmount += item.quantity * item.price;
+  });
 
   db.query(
     `INSERT INTO orders (customer_id, total_amount, order_status) VALUES (?, ?, 'Pending')`,
@@ -67,23 +73,29 @@ function placeOrder(customerId, items, res) {
       let completed = 0;
       let hasError = false;
 
-      items.forEach(item => {
+      items.forEach((item) => {
         const subtotal = item.quantity * item.price;
 
         db.query(
           `INSERT INTO order_items (order_id, product_id, quantity, subtotal) VALUES (?, ?, ?, ?)`,
           [orderId, item.product_id, item.quantity, subtotal],
           (err) => {
-            if (err && !hasError) { hasError = true; return res.status(500).json({ message: err.message }); }
-          }
+            if (err && !hasError) {
+              hasError = true;
+              return res.status(500).json({ message: err.message });
+            }
+          },
         );
 
         db.query(
           `UPDATE products SET stock = stock - ? WHERE product_id = ?`,
           [item.quantity, item.product_id],
           (err) => {
-            if (err && !hasError) { hasError = true; return res.status(500).json({ message: err.message }); }
-          }
+            if (err && !hasError) {
+              hasError = true;
+              return res.status(500).json({ message: err.message });
+            }
+          },
         );
 
         completed++;
@@ -91,23 +103,22 @@ function placeOrder(customerId, items, res) {
 
       if (!hasError) {
         res.json({
-          message: 'Order saved successfully',
+          message: "Order saved successfully",
           order_id: orderId,
-          total_amount: totalAmount
+          total_amount: totalAmount,
         });
       }
-    }
+    },
   );
 }
 
 // --- Stats: Overview ---
-app.get('/stats/overview', (req, res) => {
+app.get("/stats/overview", (req, res) => {
   const sql = `
     SELECT
-      (SELECT COUNT(*) FROM orders)                                    AS total_orders,
-      (SELECT COALESCE(SUM(total_amount), 0) FROM orders)             AS total_revenue,
-      (SELECT COUNT(*) FROM customers)                                 AS total_customers,
-
+      (SELECT COUNT(*) FROM orders)                        AS total_orders,
+      (SELECT COALESCE(SUM(total_amount), 0) FROM orders)  AS total_revenue,
+      (SELECT COUNT(*) FROM customers)                     AS total_customers
   `;
   db.query(sql, (err, result) => {
     if (err) return res.status(500).json({ message: err.message });
@@ -116,7 +127,7 @@ app.get('/stats/overview', (req, res) => {
 });
 
 // --- Stats: Best Sellers ---
-app.get('/stats/bestsellers', (req, res) => {
+app.get("/stats/bestsellers", (req, res) => {
   const sql = `
     SELECT
       p.product_id,
@@ -138,7 +149,7 @@ app.get('/stats/bestsellers', (req, res) => {
 });
 
 // --- Stats: Pairings ---
-app.get('/stats/pairings', (req, res) => {
+app.get("/stats/pairings", (req, res) => {
   const sql = `
     SELECT
       p1.product_name  AS product_a,
@@ -159,5 +170,5 @@ app.get('/stats/pairings', (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+  console.log("Server running on http://localhost:3000");
 });
