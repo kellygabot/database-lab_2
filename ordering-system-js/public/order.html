@@ -5,308 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Place Order — QuickOrder</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #faf9f7;
-      --text: #1a1916;
-      --muted: #9b9690;
-      --accent: #c8602a;
-      --line: #e8e5e0;
-      --surface: #fff;
-      --green: #4a7c5f;
-      --red: #b04040;
-      --orange: #c8602a;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Jost', sans-serif;
-      font-weight: 300;
-      min-height: 100vh;
-    }
-
-    /* Header */
-    header {
-      border-bottom: 1px solid var(--line);
-      padding: 1rem 2.5rem;
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      background: var(--bg);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .back { font-size: 0.78rem; color: var(--muted); text-decoration: none; letter-spacing: 0.05em; transition: color 0.15s; }
-    .back:hover { color: var(--accent); }
-    .logo { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 400; letter-spacing: -0.3px; }
-
-    /* Layout */
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 0;
-      max-width: 1000px;
-      margin: 0 auto;
-      min-height: calc(100vh - 57px);
-    }
-    @media(max-width: 700px) {
-      .layout { grid-template-columns: 1fr; }
-      .sidebar { border-left: none; border-top: 1px solid var(--line); }
-    }
-
-    /* Left panel */
-    .left { padding: 3rem 3rem 3rem 2.5rem; }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 400;
-      letter-spacing: -0.5px;
-      margin-bottom: 2.5rem;
-    }
-
-    /* Section */
-    .section-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1.2rem;
-      font-weight: 400;
-    }
-
-    .section { margin-bottom: 2.5rem; }
-
-    /* Fields */
-    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2rem; }
-    @media(max-width: 500px) { .field-grid { grid-template-columns: 1fr; } }
-
-    .field {
-      border-bottom: 1px solid var(--line);
-      padding: 0.5rem 0 0.7rem;
-      margin-bottom: 1.2rem;
-      transition: border-color 0.2s;
-    }
-    .field:focus-within { border-color: var(--accent); }
-
-    .field label {
-      display: block;
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.35rem;
-      font-weight: 400;
-    }
-
-    .field input {
-      background: transparent;
-      border: none;
-      outline: none;
-      width: 100%;
-      font-family: 'Jost', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 300;
-      color: var(--text);
-    }
-    .field input::placeholder { color: #c5c1bb; }
-    .field input[readonly] {
-      color: var(--accent);
-      cursor: default;
-    }
-
-    /* Add item row */
-    .add-row {
-      display: grid;
-      grid-template-columns: 80px 70px 110px auto;
-      gap: 1.5rem;
-      align-items: end;
-      margin-bottom: 0.8rem;
-    }
-    @media(max-width:500px) { .add-row { grid-template-columns: 1fr 1fr; } }
-
-    .hint {
-      font-size: 0.78rem;
-      padding: 0.5rem 0;
-      color: var(--muted);
-      min-height: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-bottom: 1rem;
-      transition: color 0.2s;
-    }
-    .hint.ok   { color: var(--green); }
-    .hint.warn { color: var(--orange); }
-    .hint.err  { color: var(--red); }
-
-    .add-btn {
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      border-radius: 2px;
-      padding: 0.65rem 1.2rem;
-      font-family: 'Jost', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-      cursor: pointer;
-      transition: background 0.18s, opacity 0.18s;
-      white-space: nowrap;
-      align-self: end;
-      margin-bottom: 1px; /* align with field bottoms */
-    }
-    .add-btn:hover:not(:disabled) { background: var(--accent); }
-    .add-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* Order items table */
-    .items-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    .items-table thead th {
-      text-align: left;
-      font-size: 0.65rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 400;
-      padding: 0 0 0.7rem;
-      border-bottom: 1px solid var(--line);
-    }
-    .items-table thead th:last-child { text-align: right; }
-    .items-table tbody td {
-      padding: 0.85rem 0;
-      border-bottom: 1px solid var(--line);
-      vertical-align: middle;
-    }
-    .items-table tbody td:last-child { text-align: right; }
-    .items-table .i-name { font-weight: 400; }
-    .items-table .i-qty  { color: var(--muted); }
-    .items-table .i-sub  { font-weight: 400; }
-    .remove-x {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.85rem;
-      padding: 0 0 0 1rem;
-      transition: color 0.15s;
-      line-height: 1;
-    }
-    .remove-x:hover { color: var(--red); }
-
-    .empty-items {
-      font-size: 0.82rem;
-      color: var(--muted);
-      padding: 1.5rem 0;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
-
-    /* Sidebar */
-    .sidebar {
-      border-left: 1px solid var(--line);
-      padding: 3rem 2.5rem;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      font-weight: 400;
-      margin-bottom: 2rem;
-    }
-
-    .summary-lines { flex: 1; }
-
-    .summary-line {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.83rem;
-      padding: 0.55rem 0;
-      border-bottom: 1px solid var(--line);
-      color: var(--muted);
-    }
-    .summary-line span:last-child { color: var(--text); font-weight: 400; }
-
-    .total-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-top: 1.5rem;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid var(--line);
-    }
-    .total-label { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-    .total-amount {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 400;
-      letter-spacing: -0.5px;
-    }
-
-    .submit-btn {
-      margin-top: 2rem;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 2px;
-      padding: 1rem;
-      width: 100%;
-      font-family: 'Jost', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      transition: opacity 0.18s, transform 0.18s;
-    }
-    .submit-btn:hover:not(:disabled) { opacity: 0.85; }
-    .submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    .note {
-      margin-top: 1rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.6;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%) translateY(16px);
-      background: var(--text);
-      color: var(--bg);
-      font-size: 0.83rem;
-      padding: 0.8rem 1.6rem;
-      border-radius: 2px;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      z-index: 999;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.err  { background: var(--red); }
-    .toast.ok   { background: var(--green); }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spin {
-      display: inline-block;
-      width: 12px; height: 12px;
-      border: 1.5px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-  </style>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/order.css">
 </head>
 <body>
   <header>
@@ -315,11 +15,10 @@
   </header>
 
   <div class="layout">
-    <!-- LEFT -->
     <div class="left">
       <h1>Place an Order</h1>
 
-      <!-- Customer details -->
+      <!-- Customer Details -->
       <div class="section">
         <div class="section-label">Customer Details</div>
         <div class="field-grid">
@@ -342,39 +41,17 @@
         </div>
       </div>
 
-      <!-- Add item -->
+      <!-- Product Picker -->
       <div class="section">
-        <div class="section-label">Add Item</div>
-        <div class="add-row">
-          <div class="field" style="margin-bottom:0">
-            <label for="pid">Product ID</label>
-            <input id="pid" type="number" min="1" placeholder="e.g. 1" oninput="onPid()">
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label for="qty">Qty</label>
-            <input id="qty" type="number" min="1" value="1" placeholder="1" oninput="onPid()">
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label>Unit Price</label>
-            <input id="unitPrice" type="text" placeholder="Auto-filled" readonly>
-          </div>
-          <button class="add-btn" id="addBtn" onclick="addItem()" disabled>Add →</button>
-        </div>
-        <div class="hint" id="hint">Enter a product ID to auto-fill price</div>
-      </div>
-
-      <!-- Items list -->
-      <div class="section">
-        <div class="section-label">Order Items</div>
-        <div id="itemsArea">
-          <div class="empty-items">No items yet.</div>
-        </div>
+        <div class="section-label">Select Items</div>
+        <input class="product-search" id="productSearch" type="text" placeholder="Search menu…" oninput="filterProducts()">
+        <div class="product-grid" id="productGrid"></div>
       </div>
     </div>
 
-    <!-- SIDEBAR -->
+    <!-- Sidebar -->
     <div class="sidebar">
-      <h2>Summary</h2>
+      <h2>Your Order</h2>
       <div class="summary-lines" id="summaryLines">
         <div class="summary-line"><span>Items</span><span>—</span></div>
       </div>
@@ -390,95 +67,87 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    let cache = {};
-    let items = [];
-    let currentProduct = null;
+    let allProducts = [];
+    let cart = {};
 
-    async function fetchProducts() {
-      if (cache._loaded) return;
-      const res = await fetch('/products');
-      const all = await res.json();
-      all.forEach(p => cache[p.product_id] = p);
-      cache._loaded = true;
+    function stockClass(s) {
+      if (s <= 0) return 's-out';
+      if (s <= 10) return 's-low';
+      return 's-in';
+    }
+    function stockLabel(s) {
+      if (s <= 0) return 'Out of stock';
+      if (s <= 10) return `${s} left`;
+      return `${s} in stock`;
     }
 
-    async function onPid() {
-      const id = parseInt(document.getElementById('pid').value);
-      const qty = parseInt(document.getElementById('qty').value) || 1;
-      const hint = document.getElementById('hint');
-      const unitPrice = document.getElementById('unitPrice');
-      const addBtn = document.getElementById('addBtn');
-
-      currentProduct = null;
-      unitPrice.value = '';
-      addBtn.disabled = true;
-      hint.className = 'hint';
-
-      if (!id || id < 1) {
-        hint.textContent = 'Enter a product ID to auto-fill price';
+    function renderGrid(products) {
+      const grid = document.getElementById('productGrid');
+      if (!products.length) {
+        grid.innerHTML = '<div class="empty-items" style="border-top:none">No products match your search.</div>';
         return;
       }
 
-      hint.textContent = 'Looking up…';
-      try { await fetchProducts(); } catch { hint.textContent = 'Could not reach server'; return; }
-
-      const p = cache[id];
-      if (!p) { hint.className = 'hint err'; hint.textContent = `No product with ID ${id}`; return; }
-
-      currentProduct = p;
-      unitPrice.value = '₱' + parseFloat(p.price).toFixed(2);
-
-      if (p.stock <= 0) {
-        hint.className = 'hint err'; hint.textContent = `"${p.product_name}" is out of stock`; return;
-      }
-      if (qty > p.stock) {
-        hint.className = 'hint warn'; hint.textContent = `Only ${p.stock} left for "${p.product_name}"`; return;
-      }
-
-      hint.className = 'hint ok';
-      hint.textContent = `✓ ${p.product_name} — ${p.stock} in stock`;
-      addBtn.disabled = false;
+      grid.innerHTML = products.map(p => {
+        const qty = cart[p.product_id] || 0;
+        const sc = stockClass(p.stock);
+        const isOut = p.stock <= 0;
+        return `
+          <div class="pc-row ${isOut ? 'out-of-stock' : ''}" id="pcrow-${p.product_id}">
+            <div>
+              <div class="pc-name">${p.product_name}</div>
+              ${p.description ? `<div class="pc-desc">${p.description}</div>` : ''}
+              <div class="pc-meta">
+                <span class="pc-price">₱${parseFloat(p.price).toFixed(2)}</span>
+                <span class="pc-stock ${sc}">${stockLabel(p.stock)}</span>
+              </div>
+            </div>
+            <div class="pc-actions" id="pca-${p.product_id}">
+              ${qty > 0 ? stepperHTML(p.product_id, qty) : addBtnHTML(p.product_id)}
+            </div>
+          </div>`;
+      }).join('');
     }
 
-    function addItem() {
-      if (!currentProduct) return;
-      const qty = parseInt(document.getElementById('qty').value) || 1;
-      if (qty < 1 || qty > currentProduct.stock) return;
+    function stepperHTML(id, qty) {
+      return `
+        <div class="qty-btn minus" onclick="changeQty(${id}, -1)">−</div>
+        <div class="qty-display">${qty}</div>
+        <div class="qty-btn plus" onclick="changeQty(${id}, 1)">+</div>`;
+    }
 
-      const ex = items.find(i => i.product_id === currentProduct.product_id);
-      if (ex) {
-        ex.quantity += qty;
+    function addBtnHTML(id) {
+      return `<button class="add-btn" onclick="changeQty(${id}, 1)">Add +</button>`;
+    }
+
+    function changeQty(id, delta) {
+      const product = allProducts.find(p => p.product_id === id);
+      if (!product) return;
+
+      const current = cart[id] || 0;
+      const next = Math.max(0, Math.min(current + delta, product.stock));
+
+      if (next === 0) {
+        delete cart[id];
       } else {
-        items.push({ product_id: currentProduct.product_id, product_name: currentProduct.product_name, quantity: qty, price: parseFloat(currentProduct.price) });
+        cart[id] = next;
       }
 
-      // reset
-      document.getElementById('pid').value = '';
-      document.getElementById('qty').value = '1';
-      document.getElementById('unitPrice').value = '';
-      document.getElementById('hint').className = 'hint';
-      document.getElementById('hint').textContent = 'Enter a product ID to auto-fill price';
-      document.getElementById('addBtn').disabled = true;
-      currentProduct = null;
-      // invalidate cache so stock re-checked next time
-      cache._loaded = false;
+      const actionsEl = document.getElementById(`pca-${id}`);
+      if (actionsEl) {
+        actionsEl.innerHTML = next > 0 ? stepperHTML(id, next) : addBtnHTML(id);
+      }
 
-      render();
+      renderSummary();
     }
 
-    function removeItem(id) {
-      items = items.filter(i => i.product_id !== id);
-      render();
-    }
-
-    function render() {
-      const area = document.getElementById('itemsArea');
+    function renderSummary() {
       const sumLines = document.getElementById('summaryLines');
       const totalEl = document.getElementById('totalAmt');
       const submitBtn = document.getElementById('submitBtn');
+      const cartItems = Object.keys(cart);
 
-      if (!items.length) {
-        area.innerHTML = '<div class="empty-items">No items yet.</div>';
+      if (!cartItems.length) {
         sumLines.innerHTML = '<div class="summary-line"><span>Items</span><span>—</span></div>';
         totalEl.textContent = '₱0.00';
         submitBtn.disabled = true;
@@ -486,33 +155,53 @@
       }
 
       let total = 0;
-      area.innerHTML = `
-        <table class="items-table">
-          <thead><tr>
-            <th>Product</th><th>Qty</th><th>Subtotal</th><th></th>
-          </tr></thead>
-          <tbody>
-            ${items.map(i => {
-              const sub = i.quantity * i.price;
-              total += sub;
-              return `<tr>
-                <td class="i-name">${i.product_name}</td>
-                <td class="i-qty">${i.quantity}</td>
-                <td class="i-sub">₱${sub.toFixed(2)}</td>
-                <td><button class="remove-x" onclick="removeItem(${i.product_id})">✕</button></td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>`;
-
-      sumLines.innerHTML = items.map(i => `
-        <div class="summary-line">
-          <span>${i.product_name} ×${i.quantity}</span>
-          <span>₱${(i.quantity*i.price).toFixed(2)}</span>
-        </div>`).join('');
+      sumLines.innerHTML = cartItems.map(id => {
+        const p = allProducts.find(p => p.product_id == id);
+        const qty = cart[id];
+        const sub = qty * parseFloat(p.price);
+        total += sub;
+        return `<div class="summary-line">
+          <span>${p.product_name} ×${qty}</span>
+          <span>₱${sub.toFixed(2)}</span>
+        </div>`;
+      }).join('');
 
       totalEl.textContent = '₱' + total.toFixed(2);
       submitBtn.disabled = false;
+    }
+
+    function filterProducts() {
+      const q = document.getElementById('productSearch').value.toLowerCase();
+      const filtered = allProducts.filter(p =>
+        p.product_name.toLowerCase().includes(q) ||
+        (p.description || '').toLowerCase().includes(q)
+      );
+      renderGrid(filtered);
+    }
+
+    function showGridSkeleton() {
+      document.getElementById('productGrid').innerHTML = Array(5).fill(`
+        <div class="pc-skel-row">
+          <div>
+            <div class="skel" style="width:45%;margin-bottom:8px"></div>
+            <div class="skel" style="width:70%;height:11px;margin-bottom:8px"></div>
+            <div class="skel" style="width:30%;height:11px"></div>
+          </div>
+          <div class="skel" style="width:60px;height:32px"></div>
+        </div>`).join('');
+    }
+
+    async function loadProducts() {
+      showGridSkeleton();
+      try {
+        const res = await fetch('/products');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        allProducts = await res.json();
+        renderGrid(allProducts);
+      } catch (e) {
+        document.getElementById('productGrid').innerHTML =
+          `<div class="empty-items" style="color:var(--red);border-top:none">⚠ Could not load menu — ${e.message}</div>`;
+      }
     }
 
     async function submit() {
@@ -521,35 +210,42 @@
       const phone    = document.getElementById('phone').value.trim();
       const address  = document.getElementById('address').value.trim();
 
-      if (!full_name || !email || !phone || !address) { toast('err', 'Please fill in all customer details.'); return; }
-      if (!items.length) { toast('err', 'Add at least one item.'); return; }
+      if (!full_name || !email || !phone || !address) {
+        toast('err', 'Please fill in all customer details.'); return;
+      }
+      if (!Object.keys(cart).length) {
+        toast('err', 'Add at least one item.'); return;
+      }
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.innerHTML = '<span class="spin"></span>Placing…';
 
+      const items = Object.keys(cart).map(id => {
+        const p = allProducts.find(p => p.product_id == id);
+        return { product_id: parseInt(id), quantity: cart[id], price: parseFloat(p.price) };
+      });
+
       try {
         const res = await fetch('/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            full_name, email, phone, address,
-            items: items.map(i => ({ product_id: i.product_id, quantity: i.quantity, price: i.price }))
-          })
+          body: JSON.stringify({ full_name, email, phone, address, items })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Server error');
 
         toast('ok', `Order #${data.order_id} placed — ₱${parseFloat(data.total_amount).toFixed(2)}`);
-        items = [];
-        render();
+        cart = {};
+        renderSummary();
         ['full_name','email','phone','address'].forEach(id => document.getElementById(id).value = '');
-      } catch(e) {
+        await loadProducts();
+      } catch (e) {
         toast('err', e.message);
         btn.disabled = false;
       } finally {
         btn.innerHTML = 'Place Order';
-        if (items.length) btn.disabled = false;
+        if (Object.keys(cart).length) btn.disabled = false;
       }
     }
 
@@ -559,6 +255,8 @@
       t.className = 'toast ' + type + ' show';
       setTimeout(() => t.classList.remove('show'), 4000);
     }
+
+    loadProducts();
   </script>
 </body>
 </html>
